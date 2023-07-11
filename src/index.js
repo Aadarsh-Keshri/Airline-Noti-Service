@@ -5,18 +5,29 @@
 
 const express=require('express');
 
-const {ServerConfig/**,Logger*/}=require('./config');   //we don't need to specify whole path in index.js file
+const {ServerConfig}=require('./config');   
 const apiRoutes = require('./routes');
 
+const mailsender=require('./config/email-config');
 const app = express();
 
-// app.use(express.json());//express bhaiya please read request in json
-// app.use(express.urlencoded({extended:true}));
+app.use(express.json());
+app.use(express.urlencoded({extended:true}));
 
 
-app.use('/api',apiRoutes);//any url starting with /api will be redirected to routes folder
+app.use('/api',apiRoutes);
 
-app.listen(ServerConfig.PORT,()=>{
+app.listen(ServerConfig.PORT,async ()=>{
     console.log(`Successfully started the server on PORT : ${ServerConfig.PORT}`);
-    //Logger.info("Successfully started the server",{msg:"something"});
+    try {
+        const response=await mailsender.sendMail({
+            from: ServerConfig.GMAIL_EMAIL,
+            to: 'aadarshcodes@gmail.com',
+            subject: 'Is the service working?',
+            text: 'Haawww Yeahhhhh!!!!'
+        });
+        console.log(response);
+    } catch (error) {
+        console.log(error);
+    }
 });
